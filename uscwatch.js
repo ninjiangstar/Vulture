@@ -1,5 +1,5 @@
-const async = require('./async.js')
-const TROJAN = require('./TROJAN.js')
+const async = require('./lib/async')
+const TROJAN = require('./lib/TROJAN')
 
 function watchUpdate(list,date,callback){
 
