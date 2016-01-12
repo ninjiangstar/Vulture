@@ -1,33 +1,33 @@
-const async = require('./lib/async')
-const TROJAN = require('./lib/TROJAN')
+const app = require('express')()
+const http = require('http').Server(app)
+const io = require('socket.io')(http)
+const USCWatch = require('./lib/controller')
 
-function watchUpdate(list,date,callback){
+var watchList = [["CTAN-452","17895"],["FADN-102","33261"],["GESM-120","35369"]]
 
-	function coursewatch(course,sect,callback){
-		TROJAN.sect(function(obj){
-			if(obj.number_registered < obj.spaces_available){
-				callback(course,sect,true)
-			} else {
-				callback(course,sect,false)
-			}
-		},{course: course,sect: sect})
-	}
-
-	coursewatch(list[0],list[1],function(c,s,b){
-		console.log(date)
-		if(b){
-			callback(course,sect)
-			console.log(c + "/" + s + " OPEN.")
-		}
-		else console.log(c + "/" + s + " CLOSED.")
-	})
-
+function pusher(callback){
+  USCWatch.s(watchList,function(c,s,b,r,s){
+    if(b) callback(c+"/"+s+" is open ("+r+"/"+s+").")
+    else callback(c+"/"+s+" is closed ("+r+"/"+s+").")
+  })
 }
 
-exports.USCWatch = function(watchList,date){
-	async.each(watchList,function(list){
-		watchUpdate(list,date,function(course,sect){
-			// do nothing yet...
-		})
-	})
-}
+app.get('/', function (req, res) {
+  res.sendFile(__dirname + '/html/index.html')
+});
+
+io.on('connection', function(socket){
+  console.log('a user connected');
+
+  function timeout() {
+    pusher(function(sd){
+      io.emit('ret', sd)
+    })
+    io.emit('ret', Date.now())
+  }
+  timeout()
+  setTimeout(timeout, (1000*10)); // refresh every 10 seconds
+
+});
+
+http.listen(3000)

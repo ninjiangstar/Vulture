@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <title>USC Watch</title>
+  </head>
+  <body>
+    <ul id="mes"></ul>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+  var socket = io();
+  socket.on('ret', function(msg){
+    $('#mes').append($('<li>').text(msg));
+  });
+</script>
+  </body>
+</html>
